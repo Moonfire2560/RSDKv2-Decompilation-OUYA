@@ -43,58 +43,61 @@ bool getControllerButton(byte buttonID) {
 
     for (int i = 0; i < controllers.size(); ++i) {
         SDL_GameController *controller = controllers[i];
+        SDL_Joystick *joystick = SDL_GameControllerGetJoystick(controller);
+        
+        if (!joystick)
+            continue;
 
-        if (SDL_GameControllerGetButton(controller, (SDL_GameControllerButton)buttonID)) {
+        // OUYA RAW JOYSTICK MODE: Read ALL buttons as raw joystick buttons
+        // This bypasses SDL's controller mapping entirely
+        if (SDL_JoystickGetButton(joystick, buttonID)) {
             pressed |= true;
             continue;
-        } else {
-            switch (buttonID) {
-                default: break;
-                case SDL_CONTROLLER_BUTTON_DPAD_UP: {
-                    int axis    = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);
-                    float delta = 0;
-                    if (axis < 0)
-                        delta = -normalize(-axis, 1, 32768);
-                    else
-                        delta = normalize(axis, 0, 32767);
-                    pressed |= delta < -LSTICK_DEADZONE;
-                    continue;
-                }
-                case SDL_CONTROLLER_BUTTON_DPAD_DOWN: {
-                    int axis    = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);
-                    float delta = 0;
-                    if (axis < 0)
-                        delta = -normalize(-axis, 1, 32768);
-                    else
-                        delta = normalize(axis, 0, 32767);
-                    pressed |= delta > LSTICK_DEADZONE;
-                    continue;
-                }
-                case SDL_CONTROLLER_BUTTON_DPAD_LEFT: {
-                    int axis    = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX);
-                    float delta = 0;
-                    if (axis < 0)
-                        delta = -normalize(-axis, 1, 32768);
-                    else
-                        delta = normalize(axis, 0, 32767);
-                    pressed |= delta < -LSTICK_DEADZONE;
-                    continue;
-                }
-                case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: {
-                    int axis    = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX);
-                    float delta = 0;
-                    if (axis < 0)
-                        delta = -normalize(-axis, 1, 32768);
-                    else
-                        delta = normalize(axis, 0, 32767);
-                    pressed |= delta > LSTICK_DEADZONE;
-                    continue;
-                }
-            }
         }
 
+        // Still handle analog stick as D-pad for movement
         switch (buttonID) {
             default: break;
+            case SDL_CONTROLLER_BUTTON_DPAD_UP: {
+                int axis    = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);
+                float delta = 0;
+                if (axis < 0)
+                    delta = -normalize(-axis, 1, 32768);
+                else
+                    delta = normalize(axis, 0, 32767);
+                pressed |= delta < -LSTICK_DEADZONE;
+                continue;
+            }
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN: {
+                int axis    = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTY);
+                float delta = 0;
+                if (axis < 0)
+                    delta = -normalize(-axis, 1, 32768);
+                else
+                    delta = normalize(axis, 0, 32767);
+                pressed |= delta > LSTICK_DEADZONE;
+                continue;
+            }
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT: {
+                int axis    = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX);
+                float delta = 0;
+                if (axis < 0)
+                    delta = -normalize(-axis, 1, 32768);
+                else
+                    delta = normalize(axis, 0, 32767);
+                pressed |= delta < -LSTICK_DEADZONE;
+                continue;
+            }
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT: {
+                int axis    = SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_LEFTX);
+                float delta = 0;
+                if (axis < 0)
+                    delta = -normalize(-axis, 1, 32768);
+                else
+                    delta = normalize(axis, 0, 32767);
+                pressed |= delta > LSTICK_DEADZONE;
+                continue;
+            }
             case SDL_CONTROLLER_BUTTON_ZL: {
                 float delta = normalize(SDL_GameControllerGetAxis(controller, SDL_CONTROLLER_AXIS_TRIGGERLEFT), 0, 32767);
                 pressed |= delta > LTRIGGER_DEADZONE;

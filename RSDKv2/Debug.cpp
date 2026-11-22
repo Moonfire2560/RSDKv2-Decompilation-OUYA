@@ -23,6 +23,10 @@ void PrintLog(const char *msg, ...)
                 sprintf(pathBuffer, "%s/log.txt", getResourcesPath());
             else
                 sprintf(pathBuffer, "log.txt");
+#elif RETRO_PLATFORM == RETRO_ANDROID
+            // Android/OUYA: BASE_PATH ("/sdcard/RSDK/v2") has no trailing slash, so without one the log is
+            // written outside the game folder as /sdcard/RSDK/v2log.txt instead of /sdcard/RSDK/v2/log.txt
+            sprintf(pathBuffer, BASE_PATH "/log.txt");
 #else
             sprintf(pathBuffer, BASE_PATH"log.txt");
 #endif
@@ -170,6 +174,7 @@ void ProcessSystemMenu() {
                 ClearGraphicsData();
                 ClearAnimationData();
                 LoadPalette("Data/Palettes/MasterPalette.act", 0, 256);
+                LoadPlayerFromList(0, 0);  // FIX: load player scripts like the normal path does
                 ActiveStageList   = 0;
                 StageMode         = STAGEMODE_LOAD;
                 Engine.GameMode   = ENGINE_MAINGAME;

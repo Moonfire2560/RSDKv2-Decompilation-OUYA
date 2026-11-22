@@ -70,7 +70,14 @@ void InitUserdata()
         ini.SetInteger("Controller 1", "A", inputDevice[INPUT_BUTTONA].contMappings = SDL_CONTROLLER_BUTTON_A);
         ini.SetInteger("Controller 1", "B", inputDevice[INPUT_BUTTONB].contMappings = SDL_CONTROLLER_BUTTON_B);
         ini.SetInteger("Controller 1", "C", inputDevice[INPUT_BUTTONC].contMappings = SDL_CONTROLLER_BUTTON_X);
+#if RETRO_PLATFORM == RETRO_ANDROID
+        // OUYA: the OUYA controller has no Start button (and the system button never reaches the game),
+        // so clicking the right stick in (R3) is used as Start instead.
+        // SDL reports it as SDL_CONTROLLER_BUTTON_RIGHTSTICK, which is raw joystick button 8 on the OUYA
+        ini.SetInteger("Controller 1", "Start", inputDevice[INPUT_START].contMappings = SDL_CONTROLLER_BUTTON_RIGHTSTICK);
+#else
         ini.SetInteger("Controller 1", "Start", inputDevice[INPUT_START].contMappings = SDL_CONTROLLER_BUTTON_START);
+#endif
 #endif
 
 #if RETRO_USING_SDL1
@@ -189,7 +196,12 @@ void InitUserdata()
         if (!ini.GetInteger("Controller 1", "C", &inputDevice[INPUT_BUTTONC].contMappings))
             inputDevice[6].contMappings = SDL_CONTROLLER_BUTTON_X;
         if (!ini.GetInteger("Controller 1", "Start", &inputDevice[INPUT_START].contMappings))
+#if RETRO_PLATFORM == RETRO_ANDROID
+            // OUYA: same as above, R3 is Start when the settings.ini has no Start entry
+            inputDevice[7].contMappings = SDL_CONTROLLER_BUTTON_RIGHTSTICK;
+#else
             inputDevice[7].contMappings = SDL_CONTROLLER_BUTTON_START;
+#endif
 #endif
 
 #if RETRO_USING_SDL1
@@ -307,17 +319,25 @@ void WriteSettings() {
 
 #if RETRO_USING_SDL2
     ini.SetComment("Controller 1", "IC1Comment", "Controller Mappings for P1 (Based on: https://wiki.libsdl.org/SDL_GameControllerButton)");
+#if RETRO_PLATFORM == RETRO_ANDROID
+    // OUYA: Input.cpp reads raw joystick buttons (it bypasses SDL's controller mapping), so IDs 0-21 below are the
+    // pad's own button numbers rather than SDL_GameControllerButton values. IDs 22+ are still the engine's extra IDs
+    ini.SetComment("Controller 1", "IC1CommentOUYA1", "OUYA controller: IDs 0-21 are raw button numbers, not SDL_GameControllerButton values:");
+    ini.SetComment("Controller 1", "IC1CommentOUYA2", "O = 0, A = 1, U = 2, Y = 3, L3 = 7, R3 = 8, L1 = 9, R1 = 10");
+    ini.SetComment("Controller 1", "IC1CommentOUYA3", "D-pad Up = 11, Down = 12, Left = 13, Right = 14, L2 = 15, R2 = 16");
+    ini.SetComment("Controller 1", "IC1CommentOUYA4", "L3 (7) is also hard-wired as Select (acts as ESC in the dev menu)");
+#endif
     ini.SetComment("Controller 1", "IC1Comment2", "Extra buttons can be mapped with the following IDs:");
-    ini.SetComment("Controller 1", "IC1Comment3", "CONTROLLER_BUTTON_ZL             = 16");
-    ini.SetComment("Controller 1", "IC1Comment4", "CONTROLLER_BUTTON_ZR             = 17");
-    ini.SetComment("Controller 1", "IC1Comment5", "CONTROLLER_BUTTON_LSTICK_UP      = 18");
-    ini.SetComment("Controller 1", "IC1Comment6", "CONTROLLER_BUTTON_LSTICK_DOWN    = 19");
-    ini.SetComment("Controller 1", "IC1Comment7", "CONTROLLER_BUTTON_LSTICK_LEFT    = 20");
-    ini.SetComment("Controller 1", "IC1Comment8", "CONTROLLER_BUTTON_LSTICK_RIGHT   = 21");
-    ini.SetComment("Controller 1", "IC1Comment9", "CONTROLLER_BUTTON_RSTICK_UP      = 22");
-    ini.SetComment("Controller 1", "IC1Comment10", "CONTROLLER_BUTTON_RSTICK_DOWN    = 23");
-    ini.SetComment("Controller 1", "IC1Comment11", "CONTROLLER_BUTTON_RSTICK_LEFT    = 24");
-    ini.SetComment("Controller 1", "IC1Comment12", "CONTROLLER_BUTTON_RSTICK_RIGHT   = 25");
+    ini.SetComment("Controller 1", "IC1Comment3", "CONTROLLER_BUTTON_ZL           = 22");
+    ini.SetComment("Controller 1", "IC1Comment4", "CONTROLLER_BUTTON_ZR           = 23");
+    ini.SetComment("Controller 1", "IC1Comment5", "CONTROLLER_BUTTON_LSTICK_UP    = 24");
+    ini.SetComment("Controller 1", "IC1Comment6", "CONTROLLER_BUTTON_LSTICK_DOWN  = 25");
+    ini.SetComment("Controller 1", "IC1Comment7", "CONTROLLER_BUTTON_LSTICK_LEFT  = 26");
+    ini.SetComment("Controller 1", "IC1Comment8", "CONTROLLER_BUTTON_LSTICK_RIGHT = 27");
+    ini.SetComment("Controller 1", "IC1Comment9", "CONTROLLER_BUTTON_RSTICK_UP    = 28");
+    ini.SetComment("Controller 1", "IC1Comment10", "CONTROLLER_BUTTON_RSTICK_DOWN  = 29");
+    ini.SetComment("Controller 1", "IC1Comment11", "CONTROLLER_BUTTON_RSTICK_LEFT  = 30");
+    ini.SetComment("Controller 1", "IC1Comment12", "CONTROLLER_BUTTON_RSTICK_RIGHT = 31");
 #endif
     ini.SetInteger("Controller 1", "Up", inputDevice[INPUT_UP].contMappings);
     ini.SetInteger("Controller 1", "Down", inputDevice[INPUT_DOWN].contMappings);

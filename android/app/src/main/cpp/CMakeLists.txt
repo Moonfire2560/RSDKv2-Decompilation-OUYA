@@ -1,16 +1,26 @@
 cmake_minimum_required(VERSION 3.22.1)
 project(RSDKv2)
+
+# CRITICAL: Force static C++ library for OUYA (Android 4.1) compatibility
+set(CMAKE_ANDROID_STL_TYPE c++_static)
+
 # Enable C++11
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Options
 option(RETRO_MOD_LOADER "Enables or disables the mod loader." ON)
 option(RETRO_USE_ORIGINAL_CODE "Removes any change that differs from the original code." OFF)
+
 # Get the path to the RSDKv2-Decompilation root
-set(RSDK_ROOT "C:/Github/RSDKv2-Decompilation-Android")
+# This file lives in <repo>/android/app/src/main/cpp, so the repo root is five folders up. Using a path relative to
+# this file (instead of a hardcoded C:/Github/... path) lets the project build from wherever it is cloned
+get_filename_component(RSDK_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../../../.." ABSOLUTE)
+
 # SDL2 Configuration
 set(SDL2_DIR "${CMAKE_CURRENT_SOURCE_DIR}/SDL2-2.30.4")
 set(SDL2_INCLUDE_DIR "${SDL2_DIR}/include")
+
 # libogg source files
 set(OGG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libogg-1.3.5")
 add_library(libogg STATIC
@@ -18,6 +28,7 @@ add_library(libogg STATIC
     ${OGG_DIR}/src/framing.c
 )
 target_include_directories(libogg PUBLIC ${OGG_DIR}/include)
+
 # libvorbis source files
 set(VORBIS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libvorbis-1.3.7")
 add_library(libvorbis STATIC
@@ -49,6 +60,7 @@ target_include_directories(libvorbis PUBLIC
     ${OGG_DIR}/include
 )
 target_link_libraries(libvorbis libogg)
+
 # Source files from the original project
 set(RETRO_FILES
     ${RSDK_ROOT}/RSDKv2/Animation.cpp
@@ -75,8 +87,10 @@ set(RETRO_FILES
     ${RSDK_ROOT}/RSDKv2/Userdata.cpp
     ${RSDK_ROOT}/RSDKv2/Video.cpp
 )
+
 # Create main shared library
 add_library(RSDKv2 SHARED ${RETRO_FILES})
+
 # Include directories
 target_include_directories(RSDKv2 PRIVATE
     ${RSDK_ROOT}/RSDKv2/
@@ -84,6 +98,7 @@ target_include_directories(RSDKv2 PRIVATE
     ${OGG_DIR}/include
     ${VORBIS_DIR}/include
 )
+
 # Compile definitions
 target_compile_definitions(RSDKv2 PRIVATE
     RETRO_USE_MOD_LOADER=$<BOOL:${RETRO_MOD_LOADER}>
@@ -92,14 +107,17 @@ target_compile_definitions(RSDKv2 PRIVATE
     BASE_PATH="/sdcard/RSDK/v2"
     RETRO_PLATFORM=5
 )
+
 # Find and link required libraries
 find_library(log-lib log)
 find_library(android-lib android)
+
 # SDL2 static library
 add_library(SDL2 STATIC IMPORTED)
 set_target_properties(SDL2 PROPERTIES
     IMPORTED_LOCATION "${SDL2_DIR}/build/${ANDROID_ABI}/libSDL2.a"
 )
+
 # cpufeatures library (only needed for armeabi-v7a)
 if(ANDROID_ABI STREQUAL "armeabi-v7a")
     add_library(cpufeatures STATIC IMPORTED)
@@ -110,6 +128,7 @@ if(ANDROID_ABI STREQUAL "armeabi-v7a")
 else()
     set(CPUFEATURES_LIB "")
 endif()
+
 # Link libraries
 target_link_libraries(RSDKv2
     SDL2

@@ -197,7 +197,14 @@ keyState[Engine.sdlEvents.key.keysym.sym] = 0;
                 break;
 #if RETRO_USING_SDL2
             case SDL_CONTROLLERBUTTONDOWN:
-                if (Engine.sdlEvents.cbutton.button == SDL_CONTROLLER_BUTTON_BACK) {
+                if (Engine.sdlEvents.cbutton.button == SDL_CONTROLLER_BUTTON_BACK
+#if RETRO_PLATFORM == RETRO_ANDROID
+                    // OUYA: the OUYA controller has no Select/Back button (and the system button never reaches the game),
+                    // so clicking the left stick in (L3) is used as Select instead.
+                    // SDL reports it as SDL_CONTROLLER_BUTTON_LEFTSTICK, which is raw joystick button 7 on the OUYA
+                    || Engine.sdlEvents.cbutton.button == SDL_CONTROLLER_BUTTON_LEFTSTICK
+#endif
+                ) {
                     // Select/Back button pressed - same as ESC
                     if (Engine.devMenu) {
 #if RETRO_USE_MOD_LOADER

@@ -11,8 +11,16 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
 
+    <!-- Android TV leanback support -->
+    <uses-feature android:name="android.software.leanback"
+        android:required="false" />
+    <!-- Touchscreen not required (allows installation on Android TV) -->
+    <uses-feature android:name="android.hardware.touchscreen"
+        android:required="false" />
+
     <application
         android:allowBackup="true"
+        android:banner="@drawable/tv_banner"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true"
@@ -27,6 +35,15 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <!-- OUYA: marks this activity as a game so the OUYA launcher lists it
+                     in its game menu on its own (no manual favoriting from Make -> Software).
+                     The launcher tile art is res/drawable-xhdpi/ouya_icon.png (732x412) -->
+                <category android:name="tv.ouya.intent.category.GAME" />
+            </intent-filter>
+            <!-- Android TV launcher -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
     </application>

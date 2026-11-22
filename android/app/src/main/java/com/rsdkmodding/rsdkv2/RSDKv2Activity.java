@@ -107,9 +107,16 @@ public class RSDKv2Activity extends SDLActivity {
         // Check if game data directory exists
         File dataDir = new File(GAME_DATA_PATH);
         if (!dataDir.exists()) {
-            Toast.makeText(this, 
-                "Game data not found at " + GAME_DATA_PATH + "\nPlease create the directory and add game files.", 
-                Toast.LENGTH_LONG).show();
+            // create the folder ourselves, so all that is left for the user to do is copy Data.bin into it
+            if (dataDir.mkdirs()) {
+                Toast.makeText(this,
+                    "Created " + GAME_DATA_PATH + "\nCopy Data.bin into it, then relaunch the game.",
+                    Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this,
+                    "Game data not found at " + GAME_DATA_PATH + "\nPlease create the directory and add game files.",
+                    Toast.LENGTH_LONG).show();
+            }
         }
     }
     @Override

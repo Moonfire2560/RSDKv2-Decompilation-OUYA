@@ -12,15 +12,16 @@ android {
         minSdk 16
         targetSdk 33
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
 
-ndk {
-    abiFilters 'armeabi-v7a', 'arm64-v8a'
-}
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
 
         externalNativeBuild {
             cmake {
-                arguments '-DANDROID_STL=c++_shared',
+                // CRITICAL FIX: Use c++_static instead of c++_shared for OUYA compatibility
+                arguments '-DANDROID_STL=c++_static',
                           '-DSDL2_STATIC=ON'
                 cppFlags '-std=c++11'
             }
@@ -28,6 +29,11 @@ ndk {
     }
 
     buildTypes {
+        debug {
+            minifyEnabled false
+            debuggable true
+            jniDebuggable true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
